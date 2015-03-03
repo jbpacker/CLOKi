@@ -171,7 +171,7 @@ classdef QBSupervisor < simiam.controller.Supervisor
                     obj.set_sensor_geometry(obj.robot);
                 end
                 
-                if (obj.percent_random >= randi([0, 100], 1, 1)/100)
+                if (obj.percent_random <= randi([0, 100], 1, 1)/100)
                     obj.SetRunAwayGoal(dangers, obj.state_estimate); %set run away goal
                 else
                     obj.SetRandomGoal(dangers, obj.state_estimate); %set run away goal
