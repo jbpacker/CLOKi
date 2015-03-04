@@ -139,10 +139,10 @@ for i = 1:initialConditions
         hy = humanPath(:,2,i,delta,1);
 
         %cut off trailing zeros
-        cx = cx(1:find(cx,1,'last'));
-        cy = cy(1:find(cy,1,'last'));
-        hx = hx(1:find(hx,1,'last'));
-        hy = hy(1:find(hy,1,'last'));
+        cx = cx(2:find(cx,1,'last'));
+        cy = cy(2:find(cy,1,'last'));
+        hx = hx(2:find(hx,1,'last'));
+        hy = hy(2:find(hy,1,'last'));
 
         %plot, points represent finish points
         plotVar = plot(cx, cy,'Color', deltaVec(delta,:), 'LineWidth', 2);
