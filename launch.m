@@ -6,6 +6,8 @@ function launch()
 clear java;
 clear classes;
 close all
+clear all
+clc
 
 if (isdeployed)
     [path, folder, ~] = fileparts(ctfroot);
@@ -27,24 +29,34 @@ app.load_ui();
 
 %changing the %random. each case in the array will be tested.
 % it's a scale from 0-1. 1 is fully random, and 0 is no random.
-random_span = linspace(0,1,3); %11 is good for n
+random_span = linspace(0,0,1); %set to 0 for sensor tuning
 
 %changing the gains - I haven't worked this one out yet, but it'll likely
 %take the spot of random in a parallel simulation. IR sensor gains [left - mid - right]
-gain_span = [1 2 3 2 1;
-    1 1 1 1 1;
-    1 1 3 1 1];
+gain_span = [1 1 1 1 1;
+    1 2 3 2 1;
+    1 1 3 1 1;
+    1 3 7 3 1;
+    1 2 5 2 1;
+    1 5 3 5 1;
+    1 2 2 2 1;
+    1 3 2 3 1;
+    2 3 1 3 2;
+    3 2 1 2 3;
+    2 2 1 2 2;
+    3 1 1 1 3];
 
 %amount of times each simulation is run
-redundancy = 3;
+%set to 1 for sensor tuning
+redundancy = 1;
 
 %number of initial conditions to run through. 1-..
 initialConditions = 2;
 
 %changing variable loop
-for delta = 1:length(random_span)
-    randomness = random_span(delta);
-    gains = gain_span(1,:);
+for delta = 1:length(gain_span(:,1))
+    randomness = 0;
+    gains = gain_span(delta,:)
     
     %initial conditions loop
     for i = 1:initialConditions
@@ -102,57 +114,50 @@ close all
 
 % endtime plot with error! that way we can see the spread of values
 figure
-colorVec = hsv(initialConditions);
 legendString = [];
+bar(finalTime(:,:,1)')
+hold on
 for i = 1:initialConditions
-    y = mean(finalTime(i,:,:),3);
-    x = random_span;
-    e = std(finalTime(i,:,:),0,3);
-    errorbar(x, y, e,'Color',colorVec(i,:), 'LineWidth', 2)
-    hold on
     legendString{i} = strcat('initial condition # ',num2str(i));
 end
 legend(legendString)
-xlabel('%randomness')
+xlabel('Sensor Set')
 ylabel('Chase Time')
-title('Chase time for changing randomness')
+title('Chase time for changing sensor weightings')
 
 %% something special for the paths
-deltaVec = hsv(length(clockyPath(1,1,1,:,r)));
-humanVec = hsv(redundancy);
+deltaVec = hsv(length(clockyPath(1,1,1,:,1)));
 legendString = [];
 
 for i = 1:initialConditions
     figure
-    for delta = 1:length(clockyPath(1,1,1,:,r))
-        for r = 1:redundancy
-            %identify what/'s of current interest
-            cx = clockyPath(:,1,i,delta,r);
-            cy = clockyPath(:,2,i,delta,r);
-            hx = humanPath(:,1,i,delta,r);
-            hy = humanPath(:,2,i,delta,r);
+    for delta = 1:length(clockyPath(1,1,1,:,1))
+        %identify what/'s of current interest
+        cx = clockyPath(:,1,i,delta,1);
+        cy = clockyPath(:,2,i,delta,1);
+        hx = humanPath(:,1,i,delta,1);
+        hy = humanPath(:,2,i,delta,1);
 
-            %cut off trailing zeros
-            cx = cx(1:find(cx,1,'last'));
-            cy = cy(1:find(cy,1,'last'));
-            hx = hx(1:find(hx,1,'last'));
-            hy = hy(1:find(hy,1,'last'));
+        %cut off trailing zeros
+        cx = cx(1:find(cx,1,'last'));
+        cy = cy(1:find(cy,1,'last'));
+        hx = hx(1:find(hx,1,'last'));
+        hy = hy(1:find(hy,1,'last'));
 
-            %plot, points represent finish points
-            plotVar = plot(cx, cy,'Color', deltaVec(delta,:), 'LineWidth', 2);
-            plot(hx, hy,'Color', deltaVec(delta,:), 'LineWidth', 2);
-            hold on
-                
-            clockyPoint = scatter(clockyFinalx(i,delta,r), clockyFinaly(i,delta,r), 100, 'g');
-            humanPoint = scatter(humanFinalx(i,delta,r), humanFinaly(i,delta,r), 100, 'r');
-            legendAssist(delta) = plotVar;
-            legendString{delta} = strcat('%random:', num2str(random_span(delta)));
-        end
+        %plot, points represent finish points
+        plotVar = plot(cx, cy,'Color', deltaVec(delta,:), 'LineWidth', 2);
+        hold on
+        plot(hx, hy,'Color', deltaVec(delta,:), 'LineWidth', 2);
+
+        clockyPoint = scatter(clockyFinalx(i,delta,1), clockyFinaly(i,delta,1), 100, 'g');
+        humanPoint = scatter(humanFinalx(i,delta,1), humanFinaly(i,delta,1), 100, 'r');
+        legendAssist(delta) = plotVar;
+        legendString{delta} = strcat('sensor configureation #', num2str(delta));
     end
-    legendAssist(length(clockyPath(1,1,1,:,r))+1) = clockyPoint;
-    legendString{length(clockyPath(1,1,1,:,r))+1} = 'cloki end position';
-    legendAssist(length(clockyPath(1,1,1,:,r))+2) = humanPoint;
-    legendString{length(clockyPath(1,1,1,:,r))+2} = 'human end position';
+    legendAssist(length(clockyPath(1,1,1,:,1))+1) = clockyPoint;
+    legendString{length(clockyPath(1,1,1,:,1))+1} = 'cloki end position';
+    legendAssist(length(clockyPath(1,1,1,:,1))+2) = humanPoint;
+    legendString{length(clockyPath(1,1,1,:,1))+2} = 'human end position';
     legend(legendAssist, legendString)
     xlabel('x position')
     ylabel('y position')
