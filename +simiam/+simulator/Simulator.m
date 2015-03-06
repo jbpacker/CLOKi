@@ -53,7 +53,7 @@ classdef Simulator < handle
             obj.world = world;
             obj.physics = simiam.simulator.Physics(world);
             obj.origin = origin;
-            obj.clockyRec = zeros(10000, 2);
+            obj.clockyRec = zeros(10000, 4);
             obj.humanRec = zeros(10000, 2);
         end
         
@@ -87,7 +87,9 @@ classdef Simulator < handle
 %                 fprintf('current_pose: (%0.3f,%0.3f,%0.3f)\n', x, y, theta);
                 
                 if k == 1 % clocky
-                    obj.clockyRec(get(obj.clock, 'TasksExecuted'), :) = [x, y];
+                    Xgoal = obj.world.robots.elementAt(k).supervisor.goal(:,1);
+                    Ygoal = obj.world.robots.elementAt(k).supervisor.goal(:,2);
+                    obj.clockyRec(get(obj.clock, 'TasksExecuted'), :) = [x, y, Xgoal, Ygoal];
                 elseif k == 2 % human
                     obj.humanRec(get(obj.clock, 'TasksExecuted'), :) = [x, y];
                 end
