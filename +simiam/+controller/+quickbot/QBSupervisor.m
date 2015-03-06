@@ -538,21 +538,21 @@ classdef QBSupervisor < simiam.controller.Supervisor
                 dangers_rf(:,i) = R*[dangers(i); 0; dangers(i)];
             end
             % 2. Apply the transformation to world frame.
+            dangers_rf = sum(dangers_rf,2);
+            runTheta_rf = atan2(dangers_rf(2),dangers_rf(1));
+            
+            x_run_rf = -dangers_rf(1)/5;
+            y_run_rf = -dangers_rf(2)/5;
             
             [x,y,theta] = state_estimate.unpack();
             
             R = obj.get_transformation_matrix(x,y,theta);
-            dangers_wf = R*dangers_rf;
+            run_wf = R*[x_run_rf; y_run_rf; 1];
             
-            dangers_wf = dangers_wf(1:2,:);    %just x,y
-            %create run away vector
-            u_i = (dangers_wf-repmat([x;y],1,nSensors));
-            u_dangers = sum(u_i,2);
-            theta = atan2(u_dangers(2),u_dangers(1))+(180*pi/180);
-            theta_deg = round(theta*180/pi);
-            theta_rand = randi([theta_deg-90, theta_deg+90],1,1);
-            x_n = x+0.25*cos(theta_rand*pi/180);
-            y_n = y+0.25*sin(theta_rand*pi/180);
+            %set carrot for runaway
+            x_n = run_wf(1);
+            y_n = run_wf(2);
+            
 %             fprintf('random theta = %d\n', theta_rand);
             %assign to the inputs array variables 
             inputs.x_g = x_n;
