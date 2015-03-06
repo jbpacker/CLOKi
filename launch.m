@@ -20,7 +20,7 @@ javaaddpath(fullfile(root_path, 'java'));
 app = simiam.ui.AppWindow(root_path, 'launcher');
    
 app.load_ui();
-settings_file = 'settings8.xml';
+settings_file = 'settings_empty.xml';
 app.ui_button_start([],[], settings_file);
 
 for z=1:10
