@@ -32,27 +32,32 @@ putvar(random_span);
 
 %changing the gains - I haven't worked this one out yet, but it'll likely
 %take the spot of random in a parallel simulation. IR sensor gains [left - mid - right]
-gain_span = [1 1 1 1 1;
-    1 2 3 2 1;
-    1 1 3 1 1;
-    1 3 7 3 1;
-    1 2 5 2 1;
+gain_span = [1 3 7 3 1;
     1 5 3 5 1;
-    1 2 2 2 1;
-    1 3 2 3 1;
-    2 3 1 3 2;
-    3 2 1 2 3;
-    2 2 1 2 2;
-    3 1 1 1 3;
-    3 1 2 1 3;
-    1 3 5 2 1; %asymmetricals 
-    3 1 5 1 2;
-    1 2 5 3 2;
-    5 3 1 2 4;
-    5 2 1 3 4;
-    1 1 1 2 1;
-    2 1 1 1 1;
-    ];
+    1 3 5 2 1;
+    1 2 5 3 1];
+
+% gain_span = [1 1 1 1 1;
+%     1 2 3 2 1;
+%     1 1 3 1 1;
+%     1 3 7 3 1; %
+%     1 2 5 2 1;
+%     1 5 3 5 1; %
+%     1 2 2 2 1;
+%     1 3 2 3 1;
+%     2 3 1 3 2;
+%     3 2 1 2 3;
+%     2 2 1 2 2;
+%     3 1 1 1 3;
+%     3 1 2 1 3;
+%     1 3 5 2 1; %this one at alpha .5* %asymmetricals 
+%     3 1 5 1 2;
+%     1 2 5 3 2;
+%     5 3 1 2 4;
+%     5 2 1 3 4;
+%     1 1 1 2 1;
+%     2 1 1 1 1;
+%     ];
 putvar(gain_span);
 
 %amount of times each simulation is run
@@ -61,11 +66,14 @@ redundancy = 1;
 putvar(redundancy);
 
 %blend amount between avoid and run
-alpha_span = linspace(0,1,5);
+% alpha_span = linspace(0,1,5);
+alpha_span = linspace(.2,.7,6);
 putvar(alpha_span);
 
 %number of initial conditions to run through. 1-..
-initialConditions = 5;
+% 1-3 given rooms (3 is empty)
+% 4 nolan, 5-6 mickey, 7-9 jef
+initialConditions = 9;
 putvar(initialConditions);
 
 %changing variable loop
@@ -198,4 +206,29 @@ for i = 1:initialConditions
     ylabel('y position')
     title(strcat('initial condition #', num2str(i)))
 end
+
+%%
+
+%identify what/'s of current interest
+i = 3;
+delta = 14;
+a = 3;
+        figure
+        cx = clockyPath(:,1,i,delta,a);
+        cy = clockyPath(:,2,i,delta,a);
+        hx = humanPath(:,1,i,delta,a);
+        hy = humanPath(:,2,i,delta,a);
+
+        %cut off trailing zeros
+        cx = cx(2:find(cx,1,'last'));
+        cy = cy(2:find(cy,1,'last'));
+        hx = hx(2:find(hx,1,'last'));
+        hy = hy(2:find(hy,1,'last'));
+
+        %plot, points represent finish points
+        plotVar = plot(cx, cy, hx, hy);
+        legend('clocky', 'human')
+        hold on
+        clockyPoint = scatter(clockyFinalx(i,delta,a), clockyFinaly(i,delta,a), 100, 'g');
+        humanPoint = scatter(humanFinalx(i,delta,a), humanFinaly(i,delta,a), 100, 'r');
 end
