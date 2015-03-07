@@ -22,8 +22,6 @@ javaaddpath(fullfile(root_path, 'java'));
 app = simiam.ui.AppWindow(root_path, 'launcher');
    
 app.load_ui();
-settings_file = 'settings8.xml';
-app.ui_button_start([],[], settings_file);
 
 %% create arrays for changing variables
 
@@ -36,26 +34,26 @@ putvar(random_span);
 %take the spot of random in a parallel simulation. IR sensor gains [left - mid - right]
 gain_span = [1 1 1 1 1;
     1 2 3 2 1;
-    1 1 3 1 1];
-%     1 3 7 3 1;
-%     1 2 5 2 1;
-%     1 5 3 5 1;
-%     1 2 2 2 1;
-%     1 3 2 3 1;
-%     2 3 1 3 2;
-%     3 2 1 2 3;
-%     2 2 1 2 2;
-%     3 1 1 1 3;
-%     3 1 2 1 3;
-%     1 3 5 2 1; %asymmetricals 
-%     3 1 5 1 2;
-%     1 2 5 3 2;
-%     5 3 1 2 4;
-%     5 2 1 3 4;
-%     1 1 1 2 1;
-%     2 1 1 1 1;
-%     ];
-puvar(gain_span);
+    1 1 3 1 1;
+    1 3 7 3 1;
+    1 2 5 2 1;
+    1 5 3 5 1;
+    1 2 2 2 1;
+    1 3 2 3 1;
+    2 3 1 3 2;
+    3 2 1 2 3;
+    2 2 1 2 2;
+    3 1 1 1 3;
+    3 1 2 1 3;
+    1 3 5 2 1; %asymmetricals 
+    3 1 5 1 2;
+    1 2 5 3 2;
+    5 3 1 2 4;
+    5 2 1 3 4;
+    1 1 1 2 1;
+    2 1 1 1 1;
+    ];
+putvar(gain_span);
 
 %amount of times each simulation is run
 %set to 1 for sensor tuning
@@ -63,11 +61,11 @@ redundancy = 1;
 putvar(redundancy);
 
 %blend amount between avoid and run
-alpha_span = linspace(0,1,3);
+alpha_span = linspace(0,1,5);
 putvar(alpha_span);
 
 %number of initial conditions to run through. 1-..
-initialConditions = 3;
+initialConditions = 5;
 putvar(initialConditions);
 
 %changing variable loop
@@ -131,14 +129,34 @@ putvar(clockyPath);
 
 %% plot
 close all
+copy = finalTime;
+copy = reshape(copy, [size(copy,1), size(copy,3)*size(copy,2), 1]);
+%some of this will require manual formatting
+Y = (1:size(finalTime,3)*size(finalTime,2)) + (floor(((1:size(finalTime,3)*size(finalTime,2))-1)/size(finalTime,2))*2);
+bar3(Y,copy')
+xlabel('initial cond.')
+set(gca,'YTickLabel',{'1' '2' '3' '4' '5' '6' '7' '8' '9' '10' '11' '12' '13' '14' '15' '16' '17' '18' '19' '20'})
+text(-2,10,'alpha=0');         
+text(-2,31,'alpha=.25');
+text(-2,52,'alpha=.5');
+text(-2,73,'alpha=.75');
+text(-2,94,'alpha=1');
+zlabel('final time')
 
-%end time plot for changing alpha and sensors
+%% end time plot for changing alpha and sensors
 for i = 1:initialConditions
     figure
-    bar3(finalTime(i,:,:)')
-    xlabel('Sensor Set')
-    ylabel('Chase Time')
+    
+    bar3(squeeze(finalTime(i,:,:)))
+    xlabel('Alpha Gain')
+    ylabel('Sensor Set')
+    zlabel('Chase Time')
     title(strcat('Chase times for initial condition #', num2str(i)))
+    legendString = [];
+    for j = 1:length(alpha_span)
+        legendString{j} = strcat('alpha = ', num2str(alpha_span(j)));
+    end
+    legend(legendString)
 end
 
 

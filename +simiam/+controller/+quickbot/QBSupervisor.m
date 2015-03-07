@@ -117,8 +117,8 @@ classdef QBSupervisor < simiam.controller.Supervisor
             obj.calibrated = false; 
             %% END CODE BLOCK %%
                                     
-            obj.p = simiam.util.Plotter();
-            obj.current_controller.p = obj.p;
+%             obj.p = simiam.util.Plotter();
+%             obj.current_controller.p = obj.p;
             
             obj.d_prog = 10;
             
@@ -376,8 +376,8 @@ classdef QBSupervisor < simiam.controller.Supervisor
         function set_current_controller(obj, ctrl)
             % save plots
             obj.current_controller = ctrl;
-            obj.p.switch_2d_ref();
-            obj.current_controller.p = obj.p;
+%             obj.p.switch_2d_ref();
+%             obj.current_controller.p = obj.p;
         end
         
         function rc = is_in_state(obj, name)
