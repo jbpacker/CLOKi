@@ -13,7 +13,8 @@ classdef AOandGTG < simiam.controller.Controller
         Kp
         Ki
         Kd
-        sensor_gains5 = [1 1 0.5 1 1];
+        sensor_gains5
+        alpha5
         
         % plot support     
         p
@@ -40,6 +41,9 @@ classdef AOandGTG < simiam.controller.Controller
             
             obj.E_k = 0;
             obj.e_k_1 = 0;
+            
+            obj.sensor_gains5 = [1 1 .5 1 1];
+            obj.alpha5 = .5;
             
 %             obj.p = simiam.util.Plotter();
         end
@@ -88,7 +92,13 @@ classdef AOandGTG < simiam.controller.Controller
             u_gtg = [x_g-x; y_g-y];
                         
             % 3. Blend the two vectors
-            alpha = 0.25;
+            if (nSensors == 5)
+                % QuickBot
+                alpha = obj.alpha5;
+            elseif (nSensors == 9)
+                % Khepera3
+                alpha = .25;
+            end
             u_ao_gtg = alpha*u_gtg+(1-alpha)*u_ao;
                         
             % 4. Compute the heading and error for the PID controller
@@ -173,6 +183,11 @@ classdef AOandGTG < simiam.controller.Controller
                 obj.sensor_gains5 = newGains;
             end
             output = obj.sensor_gains5;
+        end
+        
+        function output = set_alpha(obj, newAlpha)
+            obj.alpha5 = newAlpha;
+            output = newAlpha;
         end
         
     end
