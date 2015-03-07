@@ -25,26 +25,33 @@ app.load_ui();
 
 %% create arrays for changing variables
 
+%filter_span - number of ticks between the goal update
+filter_span = linspace(5,80,15);
+putvar(filter_span);
+
 %changing the %random. each case in the array will be tested.
 % it's a scale from 0-1. 1 is fully random, and 0 is no random.
-random_span = linspace(0,1,3); %11 is good for n
+random_span = linspace(0,0,3); %11 is good for n
 
 %changing the gains - I haven't worked this one out yet, but it'll likely
 %take the spot of random in a parallel simulation. IR sensor gains [left - mid - right]
-gain_span = [1 2 3 2 1;
+gain_span = [1 3 7 3 1;
     1 1 1 1 1;
     1 1 3 1 1];
 
 %amount of times each simulation is run
-redundancy = 3;
+redundancy = 1;
+putvar(redundancy);
 
 %number of initial conditions to run through. 1-..
-initialConditions = 2;
+initialConditions = 9;
+putvar(initialConditions);
 
 %changing variable loop
-for delta = 1:length(random_span)
-    randomness = random_span(delta);
+for delta = 1:length(filter_span)
+    randomness = random_span(1);
     gains = gain_span(1,:);
+    filter = filter_span(delta)
     
     %initial conditions loop
     for i = 1:initialConditions
@@ -68,6 +75,8 @@ for delta = 1:length(random_span)
             app.simulator_.world.robots.elementAt(1).supervisor.set_percent_random(randomness);
             % set clockys sensor gains
             app.simulator_.world.robots.elementAt(1).supervisor.controllers{5}.set_sensor_gains(gains);
+            %set clockys filter
+            app.simulator_.world.robots.elementAt(1).supervisor.set_filter(filter);
             %% re-start simulation
             app.simulator_.start();
             %detect collision or game ender
