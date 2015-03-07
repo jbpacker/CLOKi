@@ -17,7 +17,7 @@ classdef AOandGTG < simiam.controller.Controller
         alpha5
         
         % plot support     
-        p
+%         p
         
         % sensor geometry
         calibrated
@@ -120,7 +120,7 @@ classdef AOandGTG < simiam.controller.Controller
             obj.e_k_1 = e_k;
                         
             % plot  
-            obj.p.plot_2d_ref(dt, theta, theta_ao_gtg, 'c');
+%             obj.p.plot_2d_ref(dt, theta, theta_ao_gtg, 'c');
             
 %             fprintf('(v,w) = (%0.4g,%0.4g)\n', v,w);
 
