@@ -43,6 +43,8 @@ classdef QBSupervisor < simiam.controller.Supervisor
         
         switch_count
 
+        k           %filter counter
+        filter      %filter amount
         
         fw_direction%hello
         
@@ -110,7 +112,9 @@ classdef QBSupervisor < simiam.controller.Supervisor
             obj.d_stop      = 0.05;
             obj.d_at_obs    = 0.10;                
             obj.d_unsafe    = 0.05;
-            obj.percent_random = 0;
+            obj.percent_random = 0.30;
+            obj.k = 1;
+            obj.filter = 20;
             
             obj.d_fw        = 0.15;
             obj.fw_direction   = 'left';
@@ -165,7 +169,7 @@ classdef QBSupervisor < simiam.controller.Supervisor
            
              inputs.direction = obj.fw_direction;
             
-            if (any(dangers))                       %if see any danger
+            if (any(dangers) && mod(obj.k,obj.filter)==1)                       %if see any danger and filter allows
                 % Compute the placement of the sensors
                 if(~obj.calibrated)
                     obj.set_sensor_geometry(obj.robot);
@@ -177,7 +181,7 @@ classdef QBSupervisor < simiam.controller.Supervisor
                     obj.SetRandomGoal(dangers, obj.state_estimate); %set run away goal
                 end
             end
-            
+            obj.k = obj.k+1;
             outputs = obj.current_controller.execute(obj.robot, obj.state_estimate, inputs, dt);
                 
             [vel_r, vel_l] = obj.ensure_w(obj.robot, outputs.v, outputs.w);
@@ -499,13 +503,14 @@ classdef QBSupervisor < simiam.controller.Supervisor
                 R = obj.get_transformation_matrix(x_s,y_s,theta_s);
                 dangers_rf(:,i) = R*[dangers(i); 0; dangers(i)];
             end
-            % 2. Apply the transformation to world frame.
+            %sum dangers vector
             dangers_rf = sum(dangers_rf,2);
             runTheta_rf = atan2(dangers_rf(2),dangers_rf(1));
             
             x_run_rf = -dangers_rf(1)/5;
             y_run_rf = -dangers_rf(2)/5;
             
+            % 2. Apply the transformation to world frame.
             [x,y,theta] = state_estimate.unpack();
             
             R = obj.get_transformation_matrix(x,y,theta);
@@ -544,10 +549,13 @@ classdef QBSupervisor < simiam.controller.Supervisor
             x_run_rf = -dangers_rf(1)/5;
             y_run_rf = -dangers_rf(2)/5;
             
+            %standard normal distribution around run vector
+            rand_rf =normrnd([x_run_rf,y_run_rf],1);
+            
             [x,y,theta] = state_estimate.unpack();
             
             R = obj.get_transformation_matrix(x,y,theta);
-            run_wf = R*[x_run_rf; y_run_rf; 1];
+            run_wf = R*[rand_rf(1); rand_rf(2); 1];
             
             %set carrot for runaway
             x_n = run_wf(1);
@@ -593,6 +601,9 @@ classdef QBSupervisor < simiam.controller.Supervisor
         function set_percent_random(obj, input)
             obj.percent_random = input;
         end
-         
+        
+        function set_filter(obj, input)
+            obj.filter = input;
+        end
     end
 end
