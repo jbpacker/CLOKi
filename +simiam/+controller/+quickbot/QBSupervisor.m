@@ -175,9 +175,12 @@ classdef QBSupervisor < simiam.controller.Supervisor
                     obj.set_sensor_geometry(obj.robot);
                 end
                 
-                if (obj.percent_random <= randi([0, 100], 1, 1)/100)
+                randomVal = randi([1, 100], 1, 1)/100
+                if (obj.percent_random <= randomVal)
+                    fprintf('run away\n')
                     obj.SetRunAwayGoal(dangers, obj.state_estimate); %set run away goal
                 else
+                    fprintf('random away\n')
                     obj.SetRandomGoal(dangers, obj.state_estimate); %set run away goal
                 end
             end
@@ -505,7 +508,7 @@ classdef QBSupervisor < simiam.controller.Supervisor
             end
             %sum dangers vector
             dangers_rf = sum(dangers_rf,2);
-            runTheta_rf = atan2(dangers_rf(2),dangers_rf(1));
+%             runTheta_rf = atan2(dangers_rf(2),dangers_rf(1));
             
             x_run_rf = -dangers_rf(1)/5;
             y_run_rf = -dangers_rf(2)/5;
@@ -550,7 +553,15 @@ classdef QBSupervisor < simiam.controller.Supervisor
             y_run_rf = -dangers_rf(2)/5;
             
             %standard normal distribution around run vector
-            rand_rf =normrnd([x_run_rf,y_run_rf],1);
+            rand = normrnd(0,1);
+            
+            x_rand_rf = rand + x_run_rf;
+            y_rand_rf = -(y_run_rf/x_run_rf)*rand + y_run_rf;
+            
+            sqrt(x_run_rf^2 + y_run_rf^2)
+            rand_rf = sqrt(x_run_rf^2 + y_run_rf^2).*normc([x_rand_rf; y_rand_rf]);
+            
+%             rand_rf = normrnd([x_run_rf,y_run_rf],1);
             
             [x,y,theta] = state_estimate.unpack();
             

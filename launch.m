@@ -20,15 +20,34 @@ javaaddpath(fullfile(root_path, 'java'));
 app = simiam.ui.AppWindow(root_path, 'launcher');
    
 app.load_ui();
-settings_file = 'settings_empty.xml';
+settings_file = 'settings7.xml';
 app.ui_button_start([],[], settings_file);
-
+app.simulator_.stop();
 for z=1:10
     app.ui_button_zoom_out([],[]);
 end
+ % change variables
+randomness = 1;
+gains = [1 3 7 3 1];
+alpha = .4;
+filter = 30;
+ 
+% set clocky's percent randomness
+app.simulator_.world.robots.elementAt(1).supervisor.set_percent_random(randomness);
+% set clockys sensor gains
+app.simulator_.world.robots.elementAt(1).supervisor.controllers{5}.set_sensor_gains(gains);
+% set clockys alpha
+app.simulator_.world.robots.elementAt(1).supervisor.controllers{5}.set_alpha(alpha);
+% set clocky's filter value
+app.simulator_.world.robots.elementAt(1).supervisor.set_filter(filter);
 
+% re-start simulation
+app.simulator_.start();
+
+
+
+%let it run
 pause(1);
-
 
 clockyPath = app.simulator_.clockyRec;
 humanPath = app.simulator_.humanRec;
