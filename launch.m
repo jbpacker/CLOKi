@@ -27,19 +27,23 @@ app.load_ui();
 
 %changing the %random. each case in the array will be tested.
 % it's a scale from 0-1. 1 is fully random, and 0 is no random.
-random_span = linspace(0,1,3); %11 is good for n
+random_span = linspace(0,1,10); %11 is good for n
+
+%blend characteristic
+alpha = .4;
+
+%how often clocky resets goal
+filter = 30;
 
 %changing the gains - I haven't worked this one out yet, but it'll likely
 %take the spot of random in a parallel simulation. IR sensor gains [left - mid - right]
-gain_span = [1 2 3 2 1;
-    1 1 1 1 1;
-    1 1 3 1 1];
+gain_span = [1 3 7 3 1];
 
 %amount of times each simulation is run
-redundancy = 3;
+redundancy = 15;
 
 %number of initial conditions to run through. 1-..
-initialConditions = 2;
+initialConditions = 9;
 
 %changing variable loop
 for delta = 1:length(random_span)
@@ -56,18 +60,22 @@ for delta = 1:length(random_span)
 
             %run the program
             app.ui_button_start([],[], settings_file); %this loads simulator & does inital conditions
+            app.simulator_.stop();
             for z=1:10
                 app.ui_button_zoom_out([],[]);
             end
-            app.simulator_.stop();
             %% do something to change variables. You'll have access to pretty much
             %  access to anything since it's all been created (access to the
             %  creation will be much trickier
 
             % set clocky's percent randomness
             app.simulator_.world.robots.elementAt(1).supervisor.set_percent_random(randomness);
+            % set clocky's filter
+            app.simulator_.world.robots.elementAt(1).supervisor.set_filter(filter);
             % set clockys sensor gains
             app.simulator_.world.robots.elementAt(1).supervisor.controllers{5}.set_sensor_gains(gains);
+            % set clocky's blend alpha
+            app.simulator_.world.robots.elementAt(1).supervisor.controllers{5}.set_alpha(alpha);
             %% re-start simulation
             app.simulator_.start();
             %detect collision or game ender
@@ -118,13 +126,13 @@ ylabel('Chase Time')
 title('Chase time for changing randomness')
 
 %% something special for the paths
-deltaVec = hsv(length(clockyPath(1,1,1,:,r)));
+deltaVec = hsv(length(clockyPath(1,1,1,:,1)));
 humanVec = hsv(redundancy);
 legendString = [];
 
 for i = 1:initialConditions
     figure
-    for delta = 1:length(clockyPath(1,1,1,:,r))
+    for delta = 1:length(clockyPath(1,1,1,:,1))
         for r = 1:redundancy
             %identify what/'s of current interest
             cx = clockyPath(:,1,i,delta,r);
@@ -149,13 +157,14 @@ for i = 1:initialConditions
             legendString{delta} = strcat('%random:', num2str(random_span(delta)));
         end
     end
-    legendAssist(length(clockyPath(1,1,1,:,r))+1) = clockyPoint;
-    legendString{length(clockyPath(1,1,1,:,r))+1} = 'cloki end position';
-    legendAssist(length(clockyPath(1,1,1,:,r))+2) = humanPoint;
-    legendString{length(clockyPath(1,1,1,:,r))+2} = 'human end position';
+    legendAssist(length(clockyPath(1,1,1,:,1))+1) = clockyPoint;
+    legendString{length(clockyPath(1,1,1,:,1))+1} = 'cloki end position';
+    legendAssist(length(clockyPath(1,1,1,:,1))+2) = humanPoint;
+    legendString{length(clockyPath(1,1,1,:,1))+2} = 'human end position';
     legend(legendAssist, legendString)
     xlabel('x position')
     ylabel('y position')
     title(strcat('initial condition #', num2str(i)))
+    axis([-2.5 2.5 -2 2])
 end
 end
