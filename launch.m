@@ -26,7 +26,7 @@ app.load_ui();
 %% create arrays for changing variables
 
 %filter_span - number of ticks between the goal update
-filter_span = linspace(5,80,15);
+filter_span = [5 10 20 30 40 50 60];
 putvar(filter_span);
 
 %changing the %random. each case in the array will be tested.
@@ -109,15 +109,17 @@ putvar(clockyPath);
 %% plot
 close all
 
+bar(finalTime(:,:,1)')
+%%
 % endtime plot with error! that way we can see the spread of values
 figure
-colorVec = hsv(initialConditions);
 legendString = [];
 for i = 1:initialConditions
+    figure
     y = mean(finalTime(i,:,:),3);
-    x = random_span;
+    x = filter_span;
     e = std(finalTime(i,:,:),0,3);
-    errorbar(x, y, e,'Color',colorVec(i,:), 'LineWidth', 2)
+    bar(x, y)
     hold on
     legendString{i} = strcat('initial condition # ',num2str(i));
 end
@@ -127,42 +129,39 @@ ylabel('Chase Time')
 title('Chase time for changing randomness')
 
 %% something special for the paths
-deltaVec = hsv(length(clockyPath(1,1,1,:,r)));
-humanVec = hsv(redundancy);
+deltaVec = jet(length(clockyPath(1,1,1,:,1)));
 legendString = [];
 
 for i = 1:initialConditions
     figure
-    for delta = 1:length(clockyPath(1,1,1,:,r))
-        for r = 1:redundancy
-            %identify what/'s of current interest
-            cx = clockyPath(:,1,i,delta,r);
-            cy = clockyPath(:,2,i,delta,r);
-            hx = humanPath(:,1,i,delta,r);
-            hy = humanPath(:,2,i,delta,r);
+    for delta = 1:length(clockyPath(1,1,1,:,1))
+        %identify what/'s of current interest
+        cx = clockyPath(:,1,i,delta,1);
+        cy = clockyPath(:,2,i,delta,1);
+        hx = humanPath(:,1,i,delta,1);
+        hy = humanPath(:,2,i,delta,1);
 
-            %cut off trailing zeros
-            cx = cx(2:find(cx,1,'last'));
-            cy = cy(2:find(cy,1,'last'));
-            hx = hx(2:find(hx,1,'last'));
-            hy = hy(2:find(hy,1,'last'));
+        %cut off trailing zeros
+        cx = cx(2:find(cx,1,'last'));
+        cy = cy(2:find(cy,1,'last'));
+        hx = hx(2:find(hx,1,'last'));
+        hy = hy(2:find(hy,1,'last'));
 
-            %plot, points represent finish points
-            plotVar = plot(cx, cy,'Color', deltaVec(delta,:), 'LineWidth', 2);
-            plot(hx, hy,'Color', deltaVec(delta,:), 'LineWidth', 2);
-            hold on
-                
-            clockyPoint = scatter(clockyFinalx(i,delta,r), clockyFinaly(i,delta,r), 100, 'g');
-            humanPoint = scatter(humanFinalx(i,delta,r), humanFinaly(i,delta,r), 100, 'r');
-            legendAssist(delta) = plotVar;
-            legendString{delta} = strcat('%random:', num2str(random_span(delta)));
-        end
+        %plot, points represent finish points
+        plotVar = plot(cx, cy,'Color', deltaVec(delta,:), 'LineWidth', 2);
+        plot(hx, hy,'Color', deltaVec(delta,:), 'LineWidth', 2);
+        hold on
+
+        clockyPoint = scatter(clockyFinalx(i,delta,1), clockyFinaly(i,delta,1), 100, 'g');
+        humanPoint = scatter(humanFinalx(i,delta,1), humanFinaly(i,delta,1), 100, 'r');
+        legendAssist(delta) = plotVar;
+        legendString{delta} = strcat('filter : ', num2str(filter_span(delta)));
     end
-    legendAssist(length(clockyPath(1,1,1,:,r))+1) = clockyPoint;
-    legendString{length(clockyPath(1,1,1,:,r))+1} = 'cloki end position';
-    legendAssist(length(clockyPath(1,1,1,:,r))+2) = humanPoint;
-    legendString{length(clockyPath(1,1,1,:,r))+2} = 'human end position';
-    legend(legendAssist, legendString)
+    legendAssist(length(clockyPath(1,1,1,:,1))+1) = clockyPoint;
+    legendString{length(clockyPath(1,1,1,:,1))+1} = 'cloki end position';
+    legendAssist(length(clockyPath(1,1,1,:,1))+2) = humanPoint;
+    legendString{length(clockyPath(1,1,1,:,1))+2} = 'human end position';
+%     legend(legendAssist, legendString)
     xlabel('x position')
     ylabel('y position')
     title(strcat('initial condition #', num2str(i)))
