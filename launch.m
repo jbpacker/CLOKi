@@ -32,10 +32,12 @@ putvar(random_span);
 
 %changing the gains - I haven't worked this one out yet, but it'll likely
 %take the spot of random in a parallel simulation. IR sensor gains [left - mid - right]
-gain_span = [1 3 7 3 1;
-    1 5 3 5 1;
-    1 3 5 2 1;
-    1 2 5 3 1];
+gain_span = [1 3 7 3 1];
+
+% gain_span = [1 3 7 3 1;
+%     1 5 3 5 1;
+%     1 3 5 2 1;
+%     1 2 5 3 1];
 
 % gain_span = [1 1 1 1 1;
 %     1 2 3 2 1;
@@ -66,8 +68,11 @@ redundancy = 1;
 putvar(redundancy);
 
 %blend amount between avoid and run
+alpha_span = .4;
+
+% alpha_span = linspace(.2,.7,6);
+
 % alpha_span = linspace(0,1,5);
-alpha_span = linspace(.2,.7,6);
 putvar(alpha_span);
 
 %number of initial conditions to run through. 1-..
@@ -114,7 +119,7 @@ for delta = 1:length(gain_span(:,1))
             clockyFinalx(i, delta, a) = app.simulator_.world.robots.elementAt(1).pose.x;
             clockyFinaly(i, delta, a) = app.simulator_.world.robots.elementAt(1).pose.y;
             humanFinalx(i, delta, a) = app.simulator_.world.robots.elementAt(2).pose.x;
-            humanFinaly(i, delta, a) = app.simulator_.world.robots.elementAt(2).pose.y;
+            humanFinaly(i, delta, a)  = app.simulator_.world.robots.elementAt(2).pose.y;
             finalTime(i, delta, a) = 0.05*get(app.simulator_.clock, 'TasksExecuted');
 
             %right now only tracks the final loop's path.
@@ -137,18 +142,13 @@ putvar(clockyPath);
 
 %% plot
 close all
-copy = finalTime;
+copy = finalTime(:,:,:);
+Y = (1:size(copy,3)*size(copy,2)) + (floor(((1:size(copy,3)*size(copy,2))-1)/size(copy,2))*2);
+
 copy = reshape(copy, [size(copy,1), size(copy,3)*size(copy,2), 1]);
 %some of this will require manual formatting
-Y = (1:size(finalTime,3)*size(finalTime,2)) + (floor(((1:size(finalTime,3)*size(finalTime,2))-1)/size(finalTime,2))*2);
-bar3(Y,copy')
+bar3(Y,copy','stacked')
 xlabel('initial cond.')
-set(gca,'YTickLabel',{'1' '2' '3' '4' '5' '6' '7' '8' '9' '10' '11' '12' '13' '14' '15' '16' '17' '18' '19' '20'})
-text(-2,10,'alpha=0');         
-text(-2,31,'alpha=.25');
-text(-2,52,'alpha=.5');
-text(-2,73,'alpha=.75');
-text(-2,94,'alpha=1');
 zlabel('final time')
 
 %% end time plot for changing alpha and sensors
