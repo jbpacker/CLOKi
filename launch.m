@@ -53,7 +53,7 @@ hx = hx(2:find(hx,1,'last'));
 hy = hy(2:find(hy,1,'last'));
 
 close all
-plot(cx, cy, gx, gy, hx, hy)
+plot(cx, cy, gx, gy, hx, hy, 'LineWidth', 2)
 legend('clocky', 'goal', 'human')
 
 % %% create arrays for changing variables
