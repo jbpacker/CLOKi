@@ -105,7 +105,7 @@ putvar(finalTime);
 putvar(humanPath);
 putvar(clockyPath);
 
-%% plot
+%% plot - all end time plots together
 close all
 
 % endtime plot with error! that way we can see the spread of values
@@ -124,6 +124,21 @@ legend(legendString)
 xlabel('%randomness')
 ylabel('Chase Time')
 title('Chase time for changing randomness')
+
+%% individual survival time plots
+
+for i = initialConditions
+    figure
+    y = mean(finalTime(i,:,:),3);
+    x = random_span;
+    e = std(finalTime(i,:,:),0,3);
+    errorbar(x, y, e, 'LineWidth', 2)
+    hold on
+    xlabel('%randomness')
+    ylabel('Chase Time')
+    title(strcat('Survival Time for Changing Randomness in Room ', num2str(i)))
+    saveas(gcf, strcat('plots/errorBars room', num2str(i), '.png'))
+end
 
 %% something special for the paths
 deltaVec = hsv(length(clockyPath(1,1,1,:,1)));
@@ -167,4 +182,64 @@ for i = 1:initialConditions
     title(strcat('initial condition #', num2str(i)))
     axis([-2.5 2.5 -2 2])
 end
+
+%% paths - but individual for each randomness in each room and robot
+deltaVec = hsv(length(clockyPath(1,1,1,:,1)));
+legendString = [];
+
+% pick which rooms
+initialConditions = 1:9;
+for i = initialConditions
+    for delta = 1:length(clockyPath(1,1,1,:,1))
+        for robot = 1:2
+            figure
+            for r = 1:redundancy
+                %identify what/'s of current interest
+                if robot == 1
+                    x = clockyPath(:,1,i,delta,r);
+                    y = clockyPath(:,2,i,delta,r);
+                else
+                    x = humanPath(:,1,i,delta,r);
+                    y = humanPath(:,2,i,delta,r);
+                end
+
+                %cut off trailing zeros
+                x = x(2:find(x,1,'last'));
+                y = y(2:find(y,1,'last'));
+
+                %plot, points represent finish points
+                plotVar = plot(x, y,'Color', deltaVec(delta,:), 'LineWidth', 2);
+                hold on
+
+                if robot == 1
+                    clockyPoint = scatter(clockyFinalx(i,delta,r), clockyFinaly(i,delta,r), 100, 'g');
+                else
+                    humanPoint = scatter(humanFinalx(i,delta,r), humanFinaly(i,delta,r), 100, 'r');
+                end
+                legendAssist(delta) = plotVar;
+                legendString{delta} = strcat('%random:', num2str(random_span(delta)));
+            end
+        xlabel('x position')
+        ylabel('y position')
+        if robot == 1
+            title(strcat('clocky, room #', num2str(i), ' %randomness: ', num2str(random_span(delta))));
+            t = strcat('room', num2str(i), ' rand', num2str(random_span(delta)), ' clocky');
+        else
+            title(strcat('human, room #', num2str(i), ' %randomness: ', num2str(random_span(delta))));
+            t = strcat('room', num2str(i), ' rand', num2str(random_span(delta)), ' human');
+        end
+        axis([-2.5 2.5 -2 2])
+        saveas(gcf, strcat('plots/', t, '.png'))
+        end
+    end
+    legendAssist(length(clockyPath(1,1,1,:,1))+1) = clockyPoint;
+    legendString{length(clockyPath(1,1,1,:,1))+1} = 'cloki end position';
+    legendAssist(length(clockyPath(1,1,1,:,1))+2) = humanPoint;
+    legendString{length(clockyPath(1,1,1,:,1))+2} = 'human end position';
+%     legend(legendAssist, legendString)
+
+%     title(strcat('initial condition #', num2str(i)))
+    
+end
+
 end
