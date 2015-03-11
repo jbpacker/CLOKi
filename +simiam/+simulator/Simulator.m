@@ -120,8 +120,8 @@ classdef Simulator < handle
 %             fprintf('physics: %0.3fs\n', toc(tstart));
             
 %             tstart = tic;
-            obj.parent.ui_update(split, bool);
-            drawnow;
+%             obj.parent.ui_update(split, bool);
+%             drawnow;
 %             fprintf('ui: %0.3fs\n', toc(tstart));
 %             fprintf('loop: %0.3fs\n', toc(tstart));
         end
